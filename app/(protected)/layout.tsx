@@ -1,6 +1,8 @@
 import AppSidebar from "@/components/app-sidebar/AppSidebar";
 import ProtectedRoute from "@/components/auth/protected";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import ProtectedTopbar from "@/components/layout/ProtectedTopbar";
+import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/context/Authcontext";
 import type { Metadata } from "next";
 
@@ -16,16 +18,18 @@ export default function ProtectedLayout({
 }>) {
 
   return (
-    <AuthProvider>
-      <ProtectedRoute>
-        <SidebarProvider>
-          <AppSidebar />
-          <main className="w-full">
-            <SidebarTrigger />
-            {children}
-          </main>
-        </SidebarProvider>
-      </ProtectedRoute>
-    </AuthProvider>
+    <ReactQueryProvider>
+      <AuthProvider>
+        <ProtectedRoute>
+          <SidebarProvider>
+            <AppSidebar />
+            <main className="w-full min-h-svh bg-slate-50">
+              <ProtectedTopbar />
+              {children}
+            </main>
+          </SidebarProvider>
+        </ProtectedRoute>
+      </AuthProvider>
+    </ReactQueryProvider>
   );
 }
