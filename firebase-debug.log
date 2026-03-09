@@ -1,0 +1,49 @@
+[debug] [2026-03-09T16:34:05.801Z] ----------------------------------------------------------------------
+[debug] [2026-03-09T16:34:05.804Z] Command:       C:\nvm4w\nodejs\node.exe C:\nvm4w\nodejs\node_modules\firebase-tools\lib\bin\firebase.js emulators:start
+[debug] [2026-03-09T16:34:05.804Z] CLI Version:   15.5.1
+[debug] [2026-03-09T16:34:05.804Z] Platform:      win32
+[debug] [2026-03-09T16:34:05.804Z] Node Version:  v20.19.4
+[debug] [2026-03-09T16:34:05.804Z] Time:          Tue Mar 10 2026 00:34:05 GMT+0800 (Singapore Standard Time)
+[debug] [2026-03-09T16:34:05.805Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-09T16:34:07.262Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-09T16:34:07.262Z] > authorizing via signed-in user (juliusterrence.duff@gmail.com)
+[debug] [2026-03-09T16:34:08.545Z] java version "25.0.1" 2025-10-21 LTS
+
+[debug] [2026-03-09T16:34:08.546Z] Java(TM) SE Runtime Environment (build 25.0.1+8-LTS-27)
+Java HotSpot(TM) 64-Bit Server VM (build 25.0.1+8-LTS-27, mixed mode, sharing)
+
+[debug] [2026-03-09T16:34:08.575Z] Parsed Java major version: 25
+[info] i  emulators: Starting emulators: auth, firestore {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore"}}
+[debug] [2026-03-09T16:34:08.593Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-09T16:34:08.593Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-09T16:34:08.593Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-09T16:34:08.593Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-09T16:34:08.593Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-03-09T16:34:08.598Z] Write emulator hub locator at C:\Users\Terrence\AppData\Local\Temp\hub-the-project-gameplan.json
+[debug] [2026-03-09T16:34:08.611Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-03-09T16:34:08.612Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2026-03-09T16:34:08.612Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\Terrence\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.20.2.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","the-project-gameplan","--rules","D:\\Projects\\project-gameplan-admin\\firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\Terrence\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.20.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"the-project-gameplan\",\"--rules\",\"D:\\\\Projects\\\\project-gameplan-admin\\\\firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
+[info] +  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[debug] [2026-03-09T16:34:18.406Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬─────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI             │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
+└────────────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500, 9150
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[info] i  To reset your email address to juliusterrence.duff@gmail.com\, follow this link: http://127.0.0.1:9099/emulator/action?mode=recoverEmail&lang=en&oobCode=1sOGqEZ32gF8aox_sdkh6_EAjjTu-Dq2-cR8SeYRJ3l8HI4aef1ZTb&apiKey=fake-api-key {"metadata":{"emulator":{"name":"auth"},"message":"To reset your email address to juliusterrence.duff@gmail.com\\, follow this link: http://127.0.0.1:9099/emulator/action?mode=recoverEmail&lang=en&oobCode=1sOGqEZ32gF8aox_sdkh6_EAjjTu-Dq2-cR8SeYRJ3l8HI4aef1ZTb&apiKey=fake-api-key"}}
+[info] i  To reset the password for juliusterrence.duff@gmail.com, follow this link: http://127.0.0.1:9099/emulator/action?mode=resetPassword&lang=en&oobCode=u79hdxERE1oGunJ9-2nmRwbqOOMJzafwIeFAlNRBBzHqM9EGTdwWYV&apiKey=fake-api-key&newPassword=NEW_PASSWORD_HERE {"metadata":{"emulator":{"name":"auth"},"message":"To reset the password for juliusterrence.duff@gmail.com, follow this link: http://127.0.0.1:9099/emulator/action?mode=resetPassword&lang=en&oobCode=u79hdxERE1oGunJ9-2nmRwbqOOMJzafwIeFAlNRBBzHqM9EGTdwWYV&apiKey=fake-api-key&newPassword=NEW_PASSWORD_HERE"}}
