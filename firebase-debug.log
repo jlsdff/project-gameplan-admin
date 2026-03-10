@@ -1,33 +1,34 @@
-[debug] [2026-03-09T19:32:16.332Z] ----------------------------------------------------------------------
-[debug] [2026-03-09T19:32:16.335Z] Command:       C:\nvm4w\nodejs\node.exe C:\nvm4w\nodejs\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --import=./backup
-[debug] [2026-03-09T19:32:16.335Z] CLI Version:   15.5.1
-[debug] [2026-03-09T19:32:16.335Z] Platform:      win32
-[debug] [2026-03-09T19:32:16.335Z] Node Version:  v20.19.4
-[debug] [2026-03-09T19:32:16.335Z] Time:          Tue Mar 10 2026 03:32:16 GMT+0800 (Singapore Standard Time)
-[debug] [2026-03-09T19:32:16.336Z] ----------------------------------------------------------------------
+[debug] [2026-03-10T13:52:46.445Z] ----------------------------------------------------------------------
+[debug] [2026-03-10T13:52:46.448Z] Command:       C:\nvm4w\nodejs\node.exe C:\nvm4w\nodejs\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --import=./backup
+[debug] [2026-03-10T13:52:46.449Z] CLI Version:   15.5.1
+[debug] [2026-03-10T13:52:46.449Z] Platform:      win32
+[debug] [2026-03-10T13:52:46.449Z] Node Version:  v20.19.4
+[debug] [2026-03-10T13:52:46.449Z] Time:          Tue Mar 10 2026 21:52:46 GMT+0800 (Singapore Standard Time)
+[debug] [2026-03-10T13:52:46.449Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2026-03-09T19:32:17.770Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2026-03-09T19:32:17.770Z] > authorizing via signed-in user (juliusterrence.duff@gmail.com)
-[debug] [2026-03-09T19:32:17.862Z] java version "25.0.1" 2025-10-21 LTS
-Java(TM) SE Runtime Environment (build 25.0.1+8-LTS-27)
+[debug] [2026-03-10T13:53:14.524Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-10T13:53:14.525Z] > authorizing via signed-in user (juliusterrence.duff@gmail.com)
+[debug] [2026-03-10T13:53:15.836Z] java version "25.0.1" 2025-10-21 LTS
+
+[debug] [2026-03-10T13:53:15.837Z] Java(TM) SE Runtime Environment (build 25.0.1+8-LTS-27)
 Java HotSpot(TM) 64-Bit Server VM (build 25.0.1+8-LTS-27, mixed mode, sharing)
 
-[debug] [2026-03-09T19:32:17.876Z] Parsed Java major version: 25
+[debug] [2026-03-10T13:53:15.859Z] Parsed Java major version: 25
 [info] i  emulators: Starting emulators: auth, firestore {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore"}}
-[debug] [2026-03-09T19:32:17.888Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-03-09T19:32:17.889Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-03-09T19:32:17.889Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-03-09T19:32:17.889Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
-[debug] [2026-03-09T19:32:17.889Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}]},"metadata":{"message":"assigned listening specs for emulators"}}
-[debug] [2026-03-09T19:32:17.894Z] Write emulator hub locator at C:\Users\Terrence\AppData\Local\Temp\hub-the-project-gameplan.json
+[debug] [2026-03-10T13:53:15.875Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-10T13:53:15.875Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-10T13:53:15.876Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-10T13:53:15.876Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-10T13:53:15.876Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-03-10T13:53:15.882Z] Write emulator hub locator at C:\Users\Terrence\AppData\Local\Temp\hub-the-project-gameplan.json
 [info] i  firestore: Detected non-emulator Firestore export at D:\Projects\project-gameplan-admin\backup {"metadata":{"emulator":{"name":"firestore"},"message":"Detected non-emulator Firestore export at D:\\Projects\\project-gameplan-admin\\backup"}}
 [info] i  firestore: Importing data from D:\Projects\project-gameplan-admin\backup\backup.overall_export_metadata {"metadata":{"emulator":{"name":"firestore"},"message":"Importing data from D:\\Projects\\project-gameplan-admin\\backup\\backup.overall_export_metadata"}}
-[debug] [2026-03-09T19:32:17.909Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
-[debug] [2026-03-09T19:32:17.910Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
-[debug] [2026-03-09T19:32:17.910Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\Terrence\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.20.2.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","the-project-gameplan","--seed_from_export","D:\\Projects\\project-gameplan-admin\\backup\\backup.overall_export_metadata","--rules","D:\\Projects\\project-gameplan-admin\\firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\Terrence\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.20.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"the-project-gameplan\",\"--seed_from_export\",\"D:\\\\Projects\\\\project-gameplan-admin\\\\backup\\\\backup.overall_export_metadata\",\"--rules\",\"D:\\\\Projects\\\\project-gameplan-admin\\\\firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[debug] [2026-03-10T13:53:15.900Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-03-10T13:53:15.900Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2026-03-10T13:53:15.901Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\Terrence\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.20.2.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","the-project-gameplan","--seed_from_export","D:\\Projects\\project-gameplan-admin\\backup\\backup.overall_export_metadata","--rules","D:\\Projects\\project-gameplan-admin\\firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\Terrence\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.20.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"the-project-gameplan\",\"--seed_from_export\",\"D:\\\\Projects\\\\project-gameplan-admin\\\\backup\\\\backup.overall_export_metadata\",\"--rules\",\"D:\\\\Projects\\\\project-gameplan-admin\\\\firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
 [info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
 [info] +  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
-[debug] [2026-03-09T19:32:28.100Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[debug] [2026-03-10T13:53:38.419Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
 [info] 
 ┌─────────────────────────────────────────────────────────────┐
 │ ✔  All emulators ready! It is now safe to connect your app. │

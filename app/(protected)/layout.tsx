@@ -3,6 +3,7 @@ import ProtectedRoute from "@/components/auth/protected";
 import ProtectedTopbar from "@/components/layout/ProtectedTopbar";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/context/Authcontext";
 import type { Metadata } from "next";
 
@@ -27,6 +28,7 @@ export default function ProtectedLayout({
               <ProtectedTopbar />
               {children}
             </main>
+            <Toaster richColors position="top-right" />
           </SidebarProvider>
         </ProtectedRoute>
       </AuthProvider>

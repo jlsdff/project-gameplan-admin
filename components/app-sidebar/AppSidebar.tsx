@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/context/Authcontext";
 import { logout } from "@/lib/user/authentication";
 import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -118,6 +119,7 @@ export default function AppSidebar() {
                 <CustomSidebarFooter
                     name={user?.displayName ?? "Admin User"}
                     email={user?.email ?? "No email"}
+                    photoUrl={user?.photoURL ?? null}
                     onLogout={handleLogout}
                     isLoggingOut={isLoggingOut}
                 />
@@ -138,18 +140,30 @@ function CustomSidebarHeader() {
 function CustomSidebarFooter({
     name,
     email,
+    photoUrl,
     onLogout,
     isLoggingOut,
 }: {
     name: string;
     email: string;
+    photoUrl: string | null;
     onLogout: () => Promise<void>;
     isLoggingOut: boolean;
 }) {
+    const initials = getInitials(name, email);
+
     return (
         <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-            <p className="truncate text-sm font-semibold text-slate-700">{name}</p>
-            <p className="truncate text-xs text-slate-500">{email}</p>
+            <div className="flex items-center gap-3">
+                <Avatar>
+                    <AvatarImage src={photoUrl ?? undefined} alt={name} />
+                    <AvatarFallback>{initials}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-700">{name}</p>
+                    <p className="truncate text-xs text-slate-500">{email}</p>
+                </div>
+            </div>
             <Button
                 type="button"
                 variant="outline"
@@ -161,5 +175,24 @@ function CustomSidebarFooter({
             </Button>
         </div>
     );
+}
+
+function getInitials(name: string, email: string) {
+    const fullName = name.trim();
+
+    if (fullName) {
+        const parts = fullName.split(/\s+/).filter(Boolean);
+        const initialsFromName = parts
+            .slice(0, 2)
+            .map((part) => part[0]?.toUpperCase() ?? "")
+            .join("");
+
+        if (initialsFromName) {
+            return initialsFromName;
+        }
+    }
+
+    const emailPrefix = email.split("@")[0]?.trim();
+    return (emailPrefix?.slice(0, 2).toUpperCase() || "AU");
 }
 

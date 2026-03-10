@@ -46,7 +46,7 @@ type AlgoliaPlayerHit = {
   firstname?: string;
   lastname?: string;
   middlename?: string | null;
-  number?: number | null;
+  number?: string | number | null;
 };
 
 const ALGOLIA_PLAYERS_INDEX = "players" ;
@@ -140,7 +140,11 @@ export default function PlayersInfiniteTable() {
       firstname: hit.firstname ?? "",
       lastname: hit.lastname ?? "",
       middlename: hit.middlename ?? null,
-      number: typeof hit.number === "number" ? hit.number : null,
+      number: typeof hit.number === "string"
+        ? hit.number
+        : typeof hit.number === "number"
+          ? String(hit.number)
+          : null,
     }));
   }, [algoliaHits]);
 

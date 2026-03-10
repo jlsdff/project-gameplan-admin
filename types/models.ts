@@ -3,7 +3,7 @@ type Player = {
     firstname: string;
     lastname: string;
     middlename: string | null;
-    number: number | null;
+    number: string | null;
     [key: string]: unknown;
 }
 
