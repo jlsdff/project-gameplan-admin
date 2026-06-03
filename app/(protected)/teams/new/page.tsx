@@ -10,6 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Image as ImageIcon, ImageUp, RefreshCw } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -20,6 +21,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { createPlayer, getAllPlayers, searchPlayers } from "@/lib/players/crud";
 import { createTeam, getTeam, updateTeam } from "@/lib/teams/crud";
+import { listStoredImages, uploadStoredImage } from "@/lib/storage/images";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -42,6 +44,13 @@ type PlayerOption = {
   lastname: string;
   middlename?: string | null;
   number?: string | null;
+};
+
+type StoredImage = {
+  fullPath: string;
+  name: string;
+  url: string;
+  originalName: string;
 };
 
 const newInlinePlayerSchema = z.object({
@@ -98,6 +107,23 @@ function getPlayerFriendlyErrorMessage(error: unknown): string {
   return "Unable to create player right now. Please try again.";
 }
 
+function getFriendlyImageErrorMessage(error: unknown): string {
+  const message =
+    typeof error === "object" && error !== null && "message" in error
+      ? String((error as { message?: string }).message)
+      : "";
+
+  if (message.toLowerCase().includes("permission")) {
+    return "You do not have permission to manage team images.";
+  }
+
+  if (message.toLowerCase().includes("network")) {
+    return "Network error. Please check your connection and try again.";
+  }
+
+  return "Unable to load team images right now. Please try again.";
+}
+
 export default function NewTeamPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -124,11 +150,18 @@ export default function NewTeamPage() {
   const [playerSearchError, setPlayerSearchError] = useState<string | null>(null);
   const [playerError, setPlayerError] = useState<string | null>(null);
   const [isPlayerSheetOpen, setIsPlayerSheetOpen] = useState(false);
+  const [images, setImages] = useState<StoredImage[]>([]);
+  const [isLoadingImages, setIsLoadingImages] = useState(true);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageInputKey, setImageInputKey] = useState(0);
+  const [isImageSheetOpen, setIsImageSheetOpen] = useState(false);
+  const [imagesError, setImagesError] = useState<string | null>(null);
   const [submitAction, setSubmitAction] = useState<"redirect" | "stay">("redirect");
   const [isInitialLoading, setIsInitialLoading] = useState(isEditMode);
   const [initialLoadError, setInitialLoadError] = useState<string | null>(null);
 
   const selectedPlayerIds = form.watch("players");
+  const selectedTeamLogo = form.watch("teamLogo");
 
   const selectedPlayers = useMemo(
     () =>
@@ -139,6 +172,39 @@ export default function NewTeamPage() {
       }),
     [players, selectedPlayerIds],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadImages = async () => {
+      setImagesError(null);
+      setIsLoadingImages(true);
+
+      try {
+        const storedImages = await listStoredImages();
+
+        if (cancelled) {
+          return;
+        }
+
+        setImages(storedImages);
+      } catch (error) {
+        if (!cancelled) {
+          setImagesError(getFriendlyImageErrorMessage(error));
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingImages(false);
+        }
+      }
+    };
+
+    void loadImages();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!teamId) {
@@ -276,6 +342,55 @@ export default function NewTeamPage() {
       currentPlayers.filter((id) => id !== playerId),
       { shouldDirty: true },
     );
+  }
+
+  async function refreshImages() {
+    setImagesError(null);
+    setIsLoadingImages(true);
+
+    try {
+      const storedImages = await listStoredImages();
+      setImages(storedImages);
+    } catch (error) {
+      setImagesError(getFriendlyImageErrorMessage(error));
+    } finally {
+      setIsLoadingImages(false);
+    }
+  }
+
+  async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file.");
+      setImageInputKey((current) => current + 1);
+      return;
+    }
+
+    setImagesError(null);
+    setIsUploadingImage(true);
+
+    try {
+      const uploadedImage = await uploadStoredImage(file);
+      setImages((current) => [uploadedImage, ...current]);
+      form.setValue("teamLogo", uploadedImage.url, { shouldDirty: true, shouldValidate: true });
+      toast.success("Image uploaded and selected.");
+    } catch (error) {
+      const message = getFriendlyImageErrorMessage(error);
+      setImagesError(message);
+      toast.error(message);
+    } finally {
+      setIsUploadingImage(false);
+      setImageInputKey((current) => current + 1);
+    }
+  }
+
+  function selectTeamLogo(imageUrl: string) {
+    form.setValue("teamLogo", imageUrl, { shouldDirty: true, shouldValidate: true });
   }
 
   async function handleCreatePlayer(values: NewInlinePlayerFormValues) {
@@ -576,10 +691,36 @@ export default function NewTeamPage() {
               name="teamLogo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Team Logo URL</FormLabel>
+                  <FormLabel>Team Logo</FormLabel>
                   <FormControl>
-                    <Input placeholder="Optional" {...field} />
+                    <Input type="hidden" {...field} />
                   </FormControl>
+                  <div className="space-y-4 rounded-md border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-slate-900">Choose from media library</p>
+                        <p className="text-sm text-slate-600">
+                          Open the popup to pick a stored image or upload a new one.
+                        </p>
+                      </div>
+                      <Button type="button" onClick={() => setIsImageSheetOpen(true)}>
+                        <ImageUp className="size-4" />
+                        Open media picker
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                      <div>
+                        <p className="text-sm font-medium text-slate-900">Selected image</p>
+                        <p className="break-all text-sm text-slate-600">
+                          {selectedTeamLogo || "No image selected yet."}
+                        </p>
+                      </div>
+                      <Button type="button" variant="outline" size="sm" onClick={() => setIsImageSheetOpen(true)}>
+                        Change
+                      </Button>
+                    </div>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -728,6 +869,102 @@ export default function NewTeamPage() {
           </form>
         </Form>
       </section>
+
+      <Sheet open={isImageSheetOpen} onOpenChange={setIsImageSheetOpen}>
+        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-2xl">
+          <SheetHeader className="pr-10">
+            <SheetTitle>Team media picker</SheetTitle>
+            <SheetDescription>
+              Select an uploaded image for the team logo, or upload a new image if the one you want is not here yet.
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="space-y-5 px-4 pb-6">
+            <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <label className="block">
+                <span className="mb-2 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+                  Upload new image
+                </span>
+                <Input
+                  key={imageInputKey}
+                  type="file"
+                  accept="image/*"
+                  disabled={isUploadingImage}
+                  onChange={(event) => void handleImageUpload(event)}
+                  className="cursor-pointer file:mr-4 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-slate-800"
+                />
+              </label>
+
+              {isUploadingImage && (
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Spinner />
+                  Uploading image...
+                </div>
+              )}
+
+              {imagesError && (
+                <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  {imagesError}
+                </p>
+              )}
+
+              <div className="flex justify-end">
+                <Button type="button" variant="outline" size="sm" onClick={() => void refreshImages()} disabled={isLoadingImages}>
+                  {isLoadingImages ? <Spinner className="size-4" /> : <RefreshCw className="size-4" />}
+                  Refresh library
+                </Button>
+              </div>
+            </div>
+
+            {isLoadingImages ? (
+              <div className="flex items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-6 text-sm text-slate-600">
+                <Spinner />
+                Loading images...
+              </div>
+            ) : images.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {images.map((image) => {
+                  const isSelected = selectedTeamLogo === image.url;
+
+                  return (
+                    <button
+                      key={image.fullPath}
+                      type="button"
+                      onClick={() => selectTeamLogo(image.url)}
+                      className={`group overflow-hidden rounded-2xl border text-left transition ${
+                        isSelected
+                          ? "border-slate-900 ring-2 ring-slate-900/15"
+                          : "border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="relative aspect-4/3 bg-slate-100">
+                        <img
+                          src={image.url}
+                          alt={image.originalName}
+                          className="h-full w-full object-cover transition duration-200 group-hover:scale-[1.02]"
+                        />
+                        {isSelected && (
+                          <div className="absolute left-3 top-3 rounded-full bg-slate-950 px-3 py-1 text-xs font-medium text-white">
+                            Selected
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-1 p-4">
+                        <p className="break-all text-sm font-medium text-slate-900">{image.originalName}</p>
+                        <p className="break-all text-xs text-slate-500">{image.url}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-6 text-sm text-slate-600">
+                No uploaded images found.
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </main>
   );
 }
