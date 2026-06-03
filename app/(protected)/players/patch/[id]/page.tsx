@@ -11,15 +11,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { createPlayer } from "@/lib/players/crud";
+import { WholePageLoading } from "@/components/ui/wholepage-loading";
+import { getPlayer, updatePlayer } from "@/lib/players/crud";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const newPlayerSchema = z.object({
+const playerFormSchema = z.object({
   firstname: z.string().trim().min(1, "First name is required."),
   lastname: z.string().trim().min(1, "Last name is required."),
   middlename: z.string(),
@@ -28,9 +29,9 @@ const newPlayerSchema = z.object({
     .regex(/^\d*$/, "Player number must contain only digits."),
 });
 
-type NewPlayerFormValues = z.infer<typeof newPlayerSchema>;
+type PlayerFormValues = z.infer<typeof playerFormSchema>;
 
-const INITIAL_FORM_VALUES: NewPlayerFormValues = {
+const INITIAL_FORM_VALUES: PlayerFormValues = {
   firstname: "",
   lastname: "",
   middlename: "",
@@ -44,27 +45,87 @@ function getFriendlyErrorMessage(error: unknown): string {
       : "";
 
   if (message.toLowerCase().includes("permission")) {
-    return "You do not have permission to create players.";
+    return "You do not have permission to update players.";
   }
 
   if (message.toLowerCase().includes("network")) {
     return "Network error. Please check your connection and try again.";
   }
 
-  return "Unable to create player right now. Please try again.";
+  if (message.toLowerCase().includes("no such player")) {
+    return "Player not found.";
+  }
+
+  return "Unable to update player right now. Please try again.";
 }
 
-export default function NewPlayerPage() {
+export default function PatchPlayerPage() {
+  const params = useParams<{ id: string }>();
   const router = useRouter();
-  const form = useForm<NewPlayerFormValues>({
-    resolver: zodResolver(newPlayerSchema),
+  const playerId = typeof params.id === "string" ? params.id : "";
+  const form = useForm<PlayerFormValues>({
+    resolver: zodResolver(playerFormSchema),
     defaultValues: INITIAL_FORM_VALUES,
   });
-  const [error, setError] = useState<string | null>(null);
-  const [submitAction, setSubmitAction] = useState<"redirect" | "stay">("redirect");
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  async function handleSubmit(values: NewPlayerFormValues, action: "redirect" | "stay") {
-    setError(null);
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadPlayer() {
+      if (!playerId) {
+        if (mounted) {
+          setLoadError("Player not found.");
+          setLoading(false);
+        }
+        return;
+      }
+
+      setLoading(true);
+      setLoadError(null);
+
+      try {
+        const player = await getPlayer(playerId);
+
+        if (!mounted) {
+          return;
+        }
+
+        form.reset({
+          firstname: player.firstname ?? "",
+          lastname: player.lastname ?? "",
+          middlename: player.middlename ?? "",
+          number: player.number ?? "",
+        });
+      } catch (error: unknown) {
+        if (!mounted) {
+          return;
+        }
+
+        setLoadError(getFriendlyErrorMessage(error));
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadPlayer();
+
+    return () => {
+      mounted = false;
+    };
+  }, [form, playerId]);
+
+  async function handleSubmit(values: PlayerFormValues) {
+    if (!playerId) {
+      setSubmitError("Player not found.");
+      return;
+    }
+
+    setSubmitError(null);
 
     const firstname = values.firstname.trim();
     const lastname = values.lastname.trim();
@@ -72,49 +133,56 @@ export default function NewPlayerPage() {
     const numberRaw = values.number.trim();
 
     try {
-      await createPlayer({
+      await updatePlayer(playerId, {
         firstname,
         lastname,
         middlename: middlename || null,
         number: numberRaw || null,
       });
 
-      if (action === "stay") {
-        form.reset(INITIAL_FORM_VALUES);
-        toast.success("Player created.");
-        return;
-      }
-
-      toast.success("Player created. Redirecting to players...");
+      toast.success("Player updated.");
       router.push("/players");
-    } catch (submitError: unknown) {
-      const friendlyError = getFriendlyErrorMessage(submitError);
-      setError(friendlyError);
+    } catch (error: unknown) {
+      const friendlyError = getFriendlyErrorMessage(error);
+      setSubmitError(friendlyError);
       toast.error(friendlyError);
     }
+  }
+
+  if (loading) {
+    return <WholePageLoading />;
+  }
+
+  if (loadError) {
+    return (
+      <main className="min-h-screen bg-slate-50 p-4 md:p-8">
+        <section className="mx-auto max-w-2xl space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+          <header>
+            <h1 className="text-2xl font-semibold text-slate-900">Update Player</h1>
+            <p className="text-sm text-slate-600">Unable to load this player.</p>
+          </header>
+          <p className="text-sm text-red-600">{loadError}</p>
+          <div className="flex items-center justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => router.push("/players")}>
+              Back to Players
+            </Button>
+          </div>
+        </section>
+      </main>
+    );
   }
 
   return (
     <main className="min-h-screen bg-slate-50 p-4 md:p-8">
       <section className="mx-auto max-w-2xl space-y-4">
         <header>
-          <h1 className="text-2xl font-semibold text-slate-900">New Player</h1>
-          <p className="text-sm text-slate-600">Create a player record.</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Update Player</h1>
+          <p className="text-sm text-slate-600">Edit an existing player record.</p>
         </header>
 
         <Form {...form}>
           <form
-            onSubmit={(event) => {
-              const nativeEvent = event.nativeEvent as SubmitEvent;
-              const nextAction =
-                nativeEvent.submitter?.getAttribute("data-submit-action") === "stay"
-                  ? "stay"
-                  : "redirect";
-
-              setSubmitAction(nextAction);
-
-              return form.handleSubmit((values) => handleSubmit(values, nextAction))(event);
-            }}
+            onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm md:p-6"
           >
             <FormField
@@ -180,7 +248,7 @@ export default function NewPlayerPage() {
               )}
             />
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {submitError && <p className="text-sm text-red-600">{submitError}</p>}
 
             <div className="flex items-center justify-end gap-2">
               <Button
@@ -191,33 +259,14 @@ export default function NewPlayerPage() {
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                variant="outline"
-                disabled={form.formState.isSubmitting}
-                data-submit-action="stay"
-              >
-                {form.formState.isSubmitting && submitAction === "stay" ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Spinner className="size-4" />
-                    Creating...
-                  </span>
-                ) : (
-                  "Create & Add Another"
-                )}
-              </Button>
-              <Button
-                type="submit"
-                disabled={form.formState.isSubmitting}
-                data-submit-action="redirect"
-              >
+              <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? (
                   <span className="inline-flex items-center gap-2">
                     <Spinner className="size-4" />
-                    Creating...
+                    Saving...
                   </span>
                 ) : (
-                  "Create Player"
+                  "Save Changes"
                 )}
               </Button>
             </div>

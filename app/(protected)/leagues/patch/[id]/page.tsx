@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,8 +31,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { WholePageLoading } from "@/components/ui/wholepage-loading";
 import { useAuth } from "@/context/Authcontext";
-import { createLeague } from "@/lib/leagues/crud";
+import { getLeague, updateLeague } from "@/lib/leagues/crud";
 import { listStoredImages, uploadStoredImage } from "@/lib/storage/images";
 import { getTeams } from "@/lib/teams/crud";
 import { League } from "@/types/models";
@@ -86,32 +87,41 @@ function getFriendlyImageErrorMessage(error: unknown) {
   return "Unable to load league images right now. Please try again.";
 }
 
-function getFriendlyErrorMessage(error: unknown) {
+function getFriendlyLeagueErrorMessage(error: unknown) {
   const message =
     typeof error === "object" && error !== null && "message" in error
       ? String((error as { message?: string }).message)
       : "";
 
   if (message.toLowerCase().includes("permission")) {
-    return "You do not have permission to create leagues.";
+    return "You do not have permission to update leagues.";
   }
 
   if (message.toLowerCase().includes("network")) {
     return "Network error. Please check your connection and try again.";
   }
 
-  return "Unable to create league right now. Please try again.";
+  if (message.toLowerCase().includes("no such league")) {
+    return "League not found.";
+  }
+
+  return "Unable to update league right now. Please try again.";
 }
 
-export default function NewLeaguePage() {
+export default function EditLeaguePage() {
+  const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const leagueId = typeof params.id === "string" ? params.id : "";
+  const { user, loading: authLoading } = useAuth();
   const form = useForm<LeagueFormValues>({
     resolver: zodResolver(leagueFormSchema),
     defaultValues: INITIAL_VALUES,
   });
   const editorHolderRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<import("@editorjs/editorjs").default | null>(null);
+  const [league, setLeague] = useState<(League & { id: string }) | null>(null);
+  const [loadingLeague, setLoadingLeague] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [teams, setTeams] = useState<TeamOption[]>([]);
   const [images, setImages] = useState<StoredImage[]>([]);
   const [isLoadingImages, setIsLoadingImages] = useState(true);
@@ -160,6 +170,63 @@ export default function NewLeaguePage() {
   useEffect(() => {
     let cancelled = false;
 
+    const loadLeague = async () => {
+      if (!leagueId) {
+        if (!cancelled) {
+          setLoadError("League not found.");
+          setLoadingLeague(false);
+        }
+        return;
+      }
+
+      setLoadingLeague(true);
+      setLoadError(null);
+
+      try {
+        const leagueDoc = await getLeague(leagueId);
+
+        if (cancelled) {
+          return;
+        }
+
+        const nextLeague = { ...leagueDoc, id: leagueId };
+        setLeague(nextLeague);
+        form.reset({
+          title: nextLeague.title ?? "",
+          startDate: nextLeague.startDate ?? "",
+          venue: nextLeague.venue ?? "",
+          leagueImage: nextLeague.leagueImage ?? "",
+          timeFrom: nextLeague.timeFrom ?? "",
+          timeTo: nextLeague.timeTo ?? "",
+          status: nextLeague.status ?? "Ongoing",
+          dateSchedule: Array.isArray(nextLeague.dateSchedule) ? nextLeague.dateSchedule : [],
+          participatingTeams: Array.isArray(nextLeague.participatingTeams)
+            ? nextLeague.participatingTeams
+            : Array.isArray(nextLeague.participatingteams)
+              ? nextLeague.participatingteams
+              : [],
+        });
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(getFriendlyLeagueErrorMessage(error));
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingLeague(false);
+        }
+      }
+    };
+
+    void loadLeague();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [form, leagueId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
     const loadImages = async () => {
       setImagesError(null);
       setIsLoadingImages(true);
@@ -194,7 +261,7 @@ export default function NewLeaguePage() {
     let cancelled = false;
 
     const initializeEditor = async () => {
-      if (!editorHolderRef.current) {
+      if (!league || !editorHolderRef.current) {
         return;
       }
 
@@ -207,6 +274,7 @@ export default function NewLeaguePage() {
       editorRef.current = new EditorJS({
         holder: editorHolderRef.current,
         placeholder: "Write league notes, rules, or format details...",
+        data: (league.leagueData ?? {}) as EditorData,
       });
       setEditorReady(true);
     };
@@ -217,12 +285,12 @@ export default function NewLeaguePage() {
       cancelled = true;
       editorRef.current?.destroy();
       editorRef.current = null;
+      setEditorReady(false);
     };
-  }, []);
+  }, [league]);
 
   const selectedDays = form.watch("dateSchedule");
   const selectedLeagueImage = form.watch("leagueImage");
-  const selectedTeamIds = form.watch("participatingTeams");
   const visibleTeams = useMemo(() => {
     const query = teamSearch.trim().toLowerCase();
 
@@ -237,6 +305,7 @@ export default function NewLeaguePage() {
       );
     });
   }, [teamSearch, teams]);
+  const selectedTeamIds = form.watch("participatingTeams");
   const selectedTeams = useMemo(
     () =>
       selectedTeamIds.map(
@@ -319,8 +388,15 @@ export default function NewLeaguePage() {
   async function handleSubmit(values: LeagueFormValues) {
     setSubmitError(null);
 
+    if (!league) {
+      const message = "League not found.";
+      setSubmitError(message);
+      toast.error(message);
+      return;
+    }
+
     if (!user?.uid) {
-      const message = "You must be signed in to create a league.";
+      const message = "You must be signed in to update a league.";
       setSubmitError(message);
       toast.error(message);
       return;
@@ -336,8 +412,8 @@ export default function NewLeaguePage() {
     try {
       const leagueData = (await editorRef.current.save()) as unknown as EditorData;
       const payload: League = {
-        createAt: serverTimestamp(),
-        createdBy: user.uid,
+        createAt: league.createAt,
+        createdBy: league.createdBy,
         dateSchedule: values.dateSchedule,
         leagueData,
         leagueImage: values.leagueImage.trim(),
@@ -352,14 +428,33 @@ export default function NewLeaguePage() {
         venue: values.venue.trim(),
       };
 
-      await createLeague(payload);
-      toast.success("League created.");
+      await updateLeague(league.id, payload);
+      toast.success("League updated.");
       router.push("/leagues");
     } catch (error: unknown) {
-      const message = getFriendlyErrorMessage(error);
+      const message = getFriendlyLeagueErrorMessage(error);
       setSubmitError(message);
       toast.error(message);
     }
+  }
+
+  if (authLoading || loadingLeague) {
+    return <WholePageLoading />;
+  }
+
+  if (loadError) {
+    return (
+      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#f8fafc,#e2e8f0_55%,#cbd5e1)] px-4 py-8 md:px-8">
+        <section className="mx-auto max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">
+          <h1 className="text-2xl font-semibold text-slate-950">Edit League</h1>
+          <p className="mt-2 text-sm text-slate-600">Unable to load this league.</p>
+          <p className="mt-4 text-sm text-rose-700">{loadError}</p>
+          <div className="mt-6 flex justify-end">
+            <Button type="button" variant="outline" onClick={() => router.push("/leagues")}>Back to Leagues</Button>
+          </div>
+        </section>
+      </main>
+    );
   }
 
   return (
@@ -373,9 +468,9 @@ export default function NewLeaguePage() {
                 League Builder
               </div>
               <div>
-                <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Create League</h1>
+                <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Edit League</h1>
                 <p className="mt-2 max-w-2xl text-sm text-slate-300 md:text-base">
-                  Create a league document in Firestore with schedule, teams, venue, and EditorJS notes.
+                  Update the league document, chosen media image, schedule, teams, and EditorJS content.
                 </p>
               </div>
             </div>
@@ -383,7 +478,7 @@ export default function NewLeaguePage() {
             <div className="grid gap-3 text-sm text-slate-300 md:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Created by</p>
-                <p className="mt-1 break-all text-white">{loading ? "Loading..." : user?.uid ?? "Not signed in"}</p>
+                <p className="mt-1 break-all text-white">{league?.createdBy ?? "-"}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Teams loaded</p>
@@ -637,7 +732,7 @@ export default function NewLeaguePage() {
                   <Button type="button" variant="outline" onClick={() => router.push("/leagues")}>Cancel</Button>
                   <Button type="submit" disabled={form.formState.isSubmitting || !editorReady}>
                     <Save className="size-4" />
-                    {form.formState.isSubmitting ? "Creating..." : "Create League"}
+                    {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
                   </Button>
                 </div>
               </form>

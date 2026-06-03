@@ -1,6 +1,7 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectAuthEmulator, getAuth } from "firebase/auth";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,6 +16,12 @@ const firebaseConfig = {
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const storage = getStorage(app);
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __projectGameplanStorageEmulatorConnected: boolean | undefined;
+}
 
 if (process.env.NODE_ENV === "development") {
   const emulatorHost =
@@ -27,6 +34,11 @@ if (process.env.NODE_ENV === "development") {
 
   connectFirestoreEmulator(db, emulatorHost, emulatorPort);
   connectAuthEmulator(auth, authEmulatorUrl);
+
+  if (!globalThis.__projectGameplanStorageEmulatorConnected) {
+    connectStorageEmulator(storage, emulatorHost, 9199);
+    globalThis.__projectGameplanStorageEmulatorConnected = true;
+  }
 }
 
-export { db, auth };
+export { db, auth, storage };
