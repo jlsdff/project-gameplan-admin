@@ -84,6 +84,7 @@ function getTeamStats(teamPlayers: GamePlayerStats[]): GameTeamStats {
     (accumulator, player) => {
       accumulator.assists += player.assists;
       accumulator.blocks += player.blocks;
+      accumulator.points += player.threePointsMade * 3 + player.twoPointsMade * 2 + player.freeThrowsMade;
       accumulator.fieldGoalsAttempt += player.twoPointsAttempted + player.threePointsAttempted;
       accumulator.fieldGoalsMade += player.twoPointsMade + player.threePointsMade;
       accumulator.freeThrowsAttempt += player.freeThrowsAttempted;
@@ -97,6 +98,7 @@ function getTeamStats(teamPlayers: GamePlayerStats[]): GameTeamStats {
     {
       assists: 0,
       blocks: 0,
+      points: 0,
       fieldGoalsAttempt: 0,
       fieldGoalsMade: 0,
       freeThrowsAttempt: 0,
@@ -119,6 +121,7 @@ function getTeamStats(teamPlayers: GamePlayerStats[]): GameTeamStats {
   return {
     assists: totals.assists,
     blocks: totals.blocks,
+    points: totals.points,
     fieldGoals: {
       attempt: totals.fieldGoalsAttempt,
       made: totals.fieldGoalsMade,
