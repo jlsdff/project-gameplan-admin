@@ -43,12 +43,18 @@ const LEAGUE_STATUSES = ["Ongoing", "Finished"] as const;
 const leagueFormSchema = z.object({
   title: z.string().trim().min(1, "Title is required."),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD format."),
-  venue: z.string().trim().min(1, "Venue is required."),
+  venue: z.string().trim(),
   leagueImage: z.string().trim().min(1, "League image is required."),
-  timeFrom: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM in 24-hour time."),
-  timeTo: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM in 24-hour time."),
+  timeFrom: z.union([
+    z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM in 24-hour time."),
+    z.literal(""),
+  ]),
+  timeTo: z.union([
+    z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM in 24-hour time."),
+    z.literal(""),
+  ]),
   status: z.enum(LEAGUE_STATUSES),
-  dateSchedule: z.array(z.string()).min(1, "Pick at least one game day."),
+  dateSchedule: z.array(z.string()),
   participatingTeams: z.array(z.string()).min(1, "Pick at least one participating team."),
 });
 
@@ -477,7 +483,7 @@ export default function NewLeaguePage() {
                     name="timeFrom"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Time From</FormLabel>
+                        <FormLabel>Time From (optional)</FormLabel>
                         <FormControl>
                           <Input type="time" {...field} />
                         </FormControl>
@@ -491,7 +497,7 @@ export default function NewLeaguePage() {
                     name="timeTo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Time To</FormLabel>
+                        <FormLabel>Time To (optional)</FormLabel>
                         <FormControl>
                           <Input type="time" {...field} />
                         </FormControl>
@@ -506,7 +512,7 @@ export default function NewLeaguePage() {
                   name="venue"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Venue</FormLabel>
+                      <FormLabel>Venue (optional)</FormLabel>
                       <FormControl>
                         <Input placeholder="Main court / stadium / arena" {...field} />
                       </FormControl>
@@ -542,7 +548,7 @@ export default function NewLeaguePage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
                     <CalendarDays className="size-4 text-slate-500" />
-                    Date Schedule
+                    Date Schedule (optional)
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     {DAYS_OF_WEEK.map((day) => (
@@ -555,6 +561,7 @@ export default function NewLeaguePage() {
                       </label>
                     ))}
                   </div>
+                  <p className="text-xs text-slate-500">Leave this empty if the league schedule is not set yet.</p>
                   {form.formState.errors.dateSchedule?.message && (
                     <p className="text-sm font-medium text-destructive">
                       {form.formState.errors.dateSchedule.message}

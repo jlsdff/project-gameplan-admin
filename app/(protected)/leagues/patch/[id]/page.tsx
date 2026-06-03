@@ -37,6 +37,7 @@ import { getLeague, updateLeague } from "@/lib/leagues/crud";
 import { listStoredImages, uploadStoredImage } from "@/lib/storage/images";
 import { getTeams } from "@/lib/teams/crud";
 import { League } from "@/types/models";
+import type { OutputData } from "@editorjs/editorjs";
 
 const DAYS_OF_WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 const LEAGUE_STATUSES = ["Ongoing", "Finished"] as const;
@@ -44,19 +45,43 @@ const LEAGUE_STATUSES = ["Ongoing", "Finished"] as const;
 const leagueFormSchema = z.object({
   title: z.string().trim().min(1, "Title is required."),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD format."),
-  venue: z.string().trim().min(1, "Venue is required."),
+  venue: z.string().trim(),
   leagueImage: z.string().trim().min(1, "League image is required."),
-  timeFrom: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM in 24-hour time."),
-  timeTo: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM in 24-hour time."),
+  timeFrom: z.union([
+    z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM in 24-hour time."),
+    z.literal(""),
+  ]),
+  timeTo: z.union([
+    z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM in 24-hour time."),
+    z.literal(""),
+  ]),
   status: z.enum(LEAGUE_STATUSES),
-  dateSchedule: z.array(z.string()).min(1, "Pick at least one game day."),
+  dateSchedule: z.array(z.string()),
   participatingTeams: z.array(z.string()).min(1, "Pick at least one participating team."),
 });
 
 type LeagueFormValues = z.infer<typeof leagueFormSchema>;
 type TeamOption = { id: string; teamName: string; teamAbbr: string };
 type StoredImage = { fullPath: string; name: string; url: string; originalName: string };
-type EditorData = Record<string, unknown>;
+
+function normalizeEditorData(value: unknown): OutputData {
+  if (value && typeof value === "object") {
+    const candidate = value as Partial<OutputData> & Record<string, unknown>;
+
+    if (Array.isArray(candidate.blocks)) {
+      return {
+        time: typeof candidate.time === "number" ? candidate.time : Date.now(),
+        blocks: candidate.blocks,
+        version: typeof candidate.version === "string" ? candidate.version : undefined,
+      };
+    }
+  }
+
+  return {
+    time: Date.now(),
+    blocks: [],
+  };
+}
 
 const INITIAL_VALUES: LeagueFormValues = {
   title: "",
@@ -274,7 +299,7 @@ export default function EditLeaguePage() {
       editorRef.current = new EditorJS({
         holder: editorHolderRef.current,
         placeholder: "Write league notes, rules, or format details...",
-        data: (league.leagueData ?? {}) as EditorData,
+        data: normalizeEditorData(league.leagueData),
       });
       setEditorReady(true);
     };
@@ -410,12 +435,12 @@ export default function EditLeaguePage() {
     }
 
     try {
-      const leagueData = (await editorRef.current.save()) as unknown as EditorData;
+      const leagueData = (await editorRef.current.save()) as OutputData;
       const payload: League = {
         createAt: league.createAt,
         createdBy: league.createdBy,
         dateSchedule: values.dateSchedule,
-        leagueData,
+        leagueData: leagueData as unknown as Record<string, unknown>,
         leagueImage: values.leagueImage.trim(),
         participatingTeams: values.participatingTeams,
         startDate: values.startDate,
@@ -572,7 +597,7 @@ export default function EditLeaguePage() {
                     name="timeFrom"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Time From</FormLabel>
+                        <FormLabel>Time From (optional)</FormLabel>
                         <FormControl>
                           <Input type="time" {...field} />
                         </FormControl>
@@ -586,7 +611,7 @@ export default function EditLeaguePage() {
                     name="timeTo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Time To</FormLabel>
+                        <FormLabel>Time To (optional)</FormLabel>
                         <FormControl>
                           <Input type="time" {...field} />
                         </FormControl>
@@ -601,7 +626,7 @@ export default function EditLeaguePage() {
                   name="venue"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Venue</FormLabel>
+                      <FormLabel>Venue (optional)</FormLabel>
                       <FormControl>
                         <Input placeholder="Main court / stadium / arena" {...field} />
                       </FormControl>
@@ -637,7 +662,7 @@ export default function EditLeaguePage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
                     <CalendarDays className="size-4 text-slate-500" />
-                    Date Schedule
+                    Date Schedule (optional)
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     {DAYS_OF_WEEK.map((day) => (
@@ -650,6 +675,7 @@ export default function EditLeaguePage() {
                       </label>
                     ))}
                   </div>
+                  <p className="text-xs text-slate-500">Leave this empty if the league schedule is not set yet.</p>
                   {form.formState.errors.dateSchedule?.message && (
                     <p className="text-sm font-medium text-destructive">
                       {form.formState.errors.dateSchedule.message}
