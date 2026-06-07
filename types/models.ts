@@ -106,6 +106,7 @@ type GameCreateInput = {
     teamBPlayers: GamePlayerStats[];
 };
 
+
 type GameUpdateInput = GameCreateInput;
 
 export type {

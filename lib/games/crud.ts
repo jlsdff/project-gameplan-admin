@@ -170,8 +170,8 @@ function createGameRecordDoc(
 ) {
   return {
     id: teamId,
-    stats: teamStats,
     playerRecords,
+    ...teamStats,
   };
 }
 
