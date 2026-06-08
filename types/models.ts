@@ -47,6 +47,10 @@ type GameStatLine = {
 type GameTeamStats = {
     assists: number;
     blocks: number;
+    fouls: number;
+    rebounds: number;
+    turnovers: number;
+    steals: number;
     fieldGoals: GameStatLine;
     freeThrows: GameStatLine;
     points: number;

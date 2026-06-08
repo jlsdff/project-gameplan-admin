@@ -162,18 +162,18 @@ type RosterFieldName = "teamAPlayers" | "teamBPlayers";
 const playerStatSchema = z.object({
   id: z.string().min(1),
   included: z.boolean(),
-  assists: z.string(),
-  blocks: z.string(),
-  fouls: z.string(),
-  freeThrowsAttempted: z.string(),
-  freeThrowsMade: z.string(),
-  rebounds: z.string(),
-  steals: z.string(),
-  threePointsAttempted: z.string(),
-  threePointsMade: z.string(),
-  turnovers: z.string(),
-  twoPointsAttempted: z.string(),
-  twoPointsMade: z.string(),
+  assists: z.coerce.string().default("0"),
+  blocks: z.coerce.string().default("0"),
+  fouls: z.coerce.string().default("0"),
+  freeThrowsAttempted: z.coerce.string().default("0"),
+  freeThrowsMade: z.coerce.string().default("0"),
+  rebounds: z.coerce.string().default("0"),
+  steals: z.coerce.string().default("0"),
+  threePointsAttempted: z.coerce.string().default("0"),
+  threePointsMade: z.coerce.string().default("0"),
+  turnovers: z.coerce.string().default("0"),
+  twoPointsAttempted: z.coerce.string().default("0"),
+  twoPointsMade: z.coerce.string().default("0"),
 });
 
 const gameFormSchema = z
@@ -305,6 +305,10 @@ function summarizeTeam(players: GamePlayerStats[]): GameTeamStats {
       acc.assists += p.assists;
       acc.blocks += p.blocks;
       acc.points += p.threePointsMade * 3 + p.twoPointsMade * 2 + p.freeThrowsMade;
+      acc.fouls += p.fouls;
+      acc.rebounds += p.rebounds;
+      acc.steals += p.steals;
+      acc.turnovers += p.turnovers;
       acc.fieldGoalsAttempt += p.twoPointsAttempted + p.threePointsAttempted;
       acc.fieldGoalsMade += p.twoPointsMade + p.threePointsMade;
       acc.freeThrowsAttempt += p.freeThrowsAttempted;
@@ -319,6 +323,10 @@ function summarizeTeam(players: GamePlayerStats[]): GameTeamStats {
       assists: 0,
       blocks: 0,
       points: 0,
+      fouls: 0,
+      rebounds: 0,
+      steals: 0,
+      turnovers: 0,
       fieldGoalsAttempt: 0,
       fieldGoalsMade: 0,
       freeThrowsAttempt: 0,
@@ -333,6 +341,10 @@ function summarizeTeam(players: GamePlayerStats[]): GameTeamStats {
   return {
     assists: totals.assists,
     blocks: totals.blocks,
+    fouls: totals.fouls,
+    rebounds: totals.rebounds,
+    turnovers: totals.turnovers,
+    steals: totals.steals,
     fieldGoals: {
       attempt: totals.fieldGoalsAttempt,
       made: totals.fieldGoalsMade,
