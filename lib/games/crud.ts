@@ -287,6 +287,7 @@ export async function createGame(input: GameCreateInput) {
     leagueId: input.leagueId,
     number: input.number,
     players: getUniquePlayerIds(input.teamAPlayers, input.teamBPlayers),
+    playerOfTheGame: input.playerOfTheGame,
     playerStats: {
       teamA: input.teamAPlayers.map(createPlayerRecord),
       teamB: input.teamBPlayers.map(createPlayerRecord),
@@ -324,6 +325,7 @@ export async function updateGame(id: string, input: GameUpdateInput) {
     leagueId: input.leagueId,
     number: input.number,
     players: getUniquePlayerIds(input.teamAPlayers, input.teamBPlayers),
+    playerOfTheGame: input.playerOfTheGame,
     playerStats: {
       teamA: input.teamAPlayers.map(createPlayerRecord),
       teamB: input.teamBPlayers.map(createPlayerRecord),

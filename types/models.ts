@@ -105,6 +105,7 @@ type GameCreateInput = {
     date: string;
     time: string;
     teamAId: string;
+    playerOfTheGame: string | null;
     teamAPlayers: GamePlayerStats[];
     teamBId: string;
     teamBPlayers: GamePlayerStats[];

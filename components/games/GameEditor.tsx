@@ -151,6 +151,7 @@ type GameFormValues = {
   number: string;
   date: string;
   time: string;
+  playerOfTheGame: string | null;
   teamAId: string;
   teamBId: string;
   teamAPlayers: PlayerFormValue[];
@@ -182,6 +183,7 @@ const gameFormSchema = z
     number: z.string().trim().regex(/^\d+$/, "Game number is required."),
     date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD format."),
     time: z.string().trim().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM in 24-hour time."),
+    playerOfTheGame: z.string().trim().optional(),
     teamAId: z.string().trim().min(1, "Team A is required."),
     teamBId: z.string().trim().min(1, "Team B is required."),
     teamAPlayers: z.array(playerStatSchema),
@@ -199,6 +201,7 @@ const EMPTY_FORM_VALUES: GameFormValues = {
   number: "",
   date: "",
   time: "",
+  playerOfTheGame: "",
   teamAId: "",
   teamBId: "",
   teamAPlayers: [],
@@ -1197,6 +1200,7 @@ export default function GameEditor({ mode, gameId }: { mode: "create" | "edit"; 
       number: Number(values.number),
       date: values.date,
       time: values.time,
+      playerOfTheGame: values.playerOfTheGame ? String(values.playerOfTheGame) : null,
       teamAId: values.teamAId,
       teamAPlayers: normalizePlayers(values.teamAPlayers),
       teamBId: values.teamBId,
@@ -1470,6 +1474,45 @@ export default function GameEditor({ mode, gameId }: { mode: "create" | "edit"; 
                   </FormItem>
                 )}
               />
+
+              <div className="md:col-span-2">
+                <FormField
+                  control={form.control}
+                  name="playerOfTheGame"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Player of the Game</FormLabel>
+                      <FormControl>
+                        <select
+                          className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+                          {...field}
+                        >
+                          <option value="">Select player of the game</option>
+                          {teamAPlayerOptions.length > 0 && (
+                            <optgroup label={getShortTeamName(teamA)}>
+                              {teamAPlayerOptions.map((p) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.firstname} {p.lastname} ({teamA?.teamAbbr || teamA?.id})
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {teamBPlayerOptions.length > 0 && (
+                            <optgroup label={getShortTeamName(teamB)}>
+                              {teamBPlayerOptions.map((p) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.firstname} {p.lastname} ({teamB?.teamAbbr || teamB?.id})
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
+                        </select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
