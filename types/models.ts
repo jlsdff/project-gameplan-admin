@@ -2,6 +2,7 @@
 import type { Timestamp } from "firebase/firestore";
 
 type Player = {
+    id?: string;
     firstname: string;
     lastname: string;
     middlename: string | null;
@@ -10,6 +11,7 @@ type Player = {
 }
 
 type Team = {
+    id?: string;
     wins: number;
     losses: number;
     players: string[];
@@ -20,6 +22,7 @@ type Team = {
 }
 
 type League = {
+    id?: string;
     createAt: unknown;
     createdBy: string;
     dateSchedule: string[];
@@ -63,6 +66,7 @@ type GameRecordPlayerStats = {
     blocks: number;
     fouls: number;
     freeThrowsAttempted: number;
+    playerId?: string | null;
     freeThrowsMade: number;
     id: string;
     rebounds: number;
@@ -104,12 +108,45 @@ type GameCreateInput = {
     number: number;
     date: string;
     time: string;
-    teamAId: string;
     playerOfTheGame: string | null;
+    teamAId: string;
     teamAPlayers: GamePlayerStats[];
     teamBId: string;
     teamBPlayers: GamePlayerStats[];
 };
+
+type PlayingPlayers = {
+    teamA: string[],
+    teamB: string[]
+}
+
+type LiveStatsForm = {
+    leagueId: string;
+    teamAId: string;
+    teamBId: string;
+    stats?: GameRecordPlayerStats[];
+    playingPlayers: PlayingPlayers; 
+    status: boolean | null;
+    createdAt?: Timestamp | unknown;
+}
+
+
+type IncrementableStatKey = keyof Omit<GameRecordPlayerStats, "id" | "playerId">;
+
+interface StatAction {
+  liveStatId: string;
+  statDocId: string;
+  key: IncrementableStatKey;
+  type: "increment" | "decrement";
+  amount: number;
+  timestamp: Date;
+}
+
+interface StatCommand {
+  execute(): void;
+  undo(): void;
+  meta: StatAction;
+}
 
 
 type GameUpdateInput = GameCreateInput;
@@ -122,7 +159,12 @@ export type {
     GameStatLine,
     GameTeamStats,
     GameUpdateInput,
+    LiveStatsForm,
     League,
     Player,
     Team,
+    PlayingPlayers,
+    StatAction,
+    StatCommand,
+    IncrementableStatKey
 }

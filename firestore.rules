@@ -8,6 +8,14 @@ service cloud.firestore {
     match /players/{document=**}{
     	allow write: if request.auth != null;
     }
+
+    match /live-stats/{document=**} {
+      allow read;
+    }
+    match /live-stats/{document=**}{
+    	allow write: if request.auth != null;
+    }
+    
     match /teams/{document=**} {
       allow read;
     }

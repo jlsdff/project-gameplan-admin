@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, query, queryEqual, updateDoc, where } from "firebase/firestore";
 
 import { db } from "@/lib/firebase/firebase";
 import { League } from "@/types/models";
@@ -13,7 +13,7 @@ export const getLeague = async (id: string) => {
   const snapshot = await getDoc(docRef);
 
   if (snapshot.exists()) {
-    return snapshot.data() as League;
+    return {id: snapshot.id, ...snapshot.data()} as League;
   }
 
   throw new Error("No such league!");
@@ -32,3 +32,18 @@ export const updateLeague = async (id: string, league: League) => {
   const docRef = doc(db, "leagues", id);
   await updateDoc(docRef, league);
 };
+
+export const getOngoingLeagues = async () => {
+
+  const leaguesRef = collection(db, "leagues")
+
+  const q = query(leaguesRef, where('status', '==', 'Ongoing'))
+
+  const snapshot = await getDocs(q)
+
+  return snapshot.docs.map( (doc) => ({
+    id: doc.id,
+    ...doc.data() as League
+  }))
+
+}

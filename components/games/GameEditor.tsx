@@ -19,6 +19,8 @@ import { getLeagues } from "@/lib/leagues/crud";
 import { getAllPlayers } from "@/lib/players/crud";
 import { getTeamsByIds } from "@/lib/teams/crud";
 import type { GamePlayerStats, GameTeamStats } from "@/types/models";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Skeleton } from "../ui/skeleton";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -76,7 +78,7 @@ type PlayerOption = {
   number: string | null;
 };
 
-type TeamOption = {
+export type TeamOption = {
   id: string;
   teamName: string;
   teamAbbr: string;
@@ -302,7 +304,7 @@ function formatPercentage(made: number, attempt: number) {
   return `${((made / attempt) * 100).toFixed(1)}%`;
 }
 
-function summarizeTeam(players: GamePlayerStats[]): GameTeamStats {
+export function summarizeTeam(players: GamePlayerStats[]): GameTeamStats {
   const totals = players.reduce(
     (acc, p) => {
       acc.assists += p.assists;
@@ -1910,17 +1912,34 @@ function TeamPlayerEditor({
   );
 }
 
-function TeamSummaryCard({ title, team, stats }: { title: string; team: TeamOption | undefined; stats: GameTeamStats }) {
+export function TeamSummaryCard({ title, team, stats }: { title: string; team: TeamOption | undefined; stats: GameTeamStats | undefined }) {
+
+  if(!stats) {
+    return (
+      <Card className="w-1/2">
+          <CardHeader>
+              <Skeleton className="w-full max-w-xs h-4" />
+          </CardHeader>
+          <CardContent>
+              <Skeleton className="w-full max-w-md h-8 " />
+          </CardContent>
+      </Card>
+    )
+  }
+  
   return (
-    <section className="rounded-3xl border border-slate-200 bg-slate-950 p-4 text-white shadow-sm">
+    <section className="rounded-3xl border border-slate-200 bg-slate-950 p-4 text-white shadow-sm w-full">
       <div className="mb-4 space-y-1">
         <h2 className="text-lg font-semibold">{title}</h2>
-        <p className="text-sm text-slate-300">{team ? `${team.teamName} summary` : "Waiting for team selection"}</p>
+        <p className="text-sm text-slate-300">{team ? `${team.teamName}` : "Waiting for team selection"}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <SummaryStat label="Points" value={stats.points} />
         <SummaryStat label="Assists" value={stats.assists} />
+        <SummaryStat label="Rebounds" value={stats.rebounds} />
         <SummaryStat label="Blocks" value={stats.blocks} />
+        <SummaryStat label="Steals" value={stats.steals} />
+        <SummaryStat label="Turnovers" value={stats.turnovers} />
         <SummaryStat
           label="Field Goals"
           value={`${stats.fieldGoals.made}/${stats.fieldGoals.attempt} (${stats.fieldGoals.percentage})`}
@@ -1929,14 +1948,19 @@ function TeamSummaryCard({ title, team, stats }: { title: string; team: TeamOpti
           label="Free Throws"
           value={`${stats.freeThrows.made}/${stats.freeThrows.attempt} (${stats.freeThrows.percentage})`}
         />
-        <SummaryStat
-          label="3 Points"
-          value={`${stats.threePoints.made}/${stats.threePoints.attempt} (${stats.threePoints.percentage})`}
-        />
-        <SummaryStat
-          label="2 Points"
-          value={`${stats.twoPoints.made}/${stats.twoPoints.attempt} (${stats.twoPoints.percentage})`}
-        />
+        <div className="col-span-2">
+          <SummaryStat
+            label="2 Points"
+            value={`${stats.twoPoints.made}/${stats.twoPoints.attempt} (${stats.twoPoints.percentage})`}
+          />
+        </div>
+        <div className="col-span-2">
+          <SummaryStat
+            label="3 Points"
+            value={`${stats.threePoints.made}/${stats.threePoints.attempt} (${stats.threePoints.percentage})`}
+          />
+        </div>
+
       </div>
     </section>
   );

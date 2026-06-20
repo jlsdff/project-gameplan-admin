@@ -21,7 +21,8 @@ import {
     Shield,
     Trophy,
     Users,
-    Gamepad2
+    Gamepad2,
+    TrendingUp
 } from "lucide-react";
 
 
@@ -115,6 +116,18 @@ export default function AppSidebar() {
                     <Link href="/games/new" className={getNavLinkClass("/games/new") }>
                         <Plus className="h-4 w-4" />
                         New Game
+                    </Link>
+                </SidebarGroup>
+
+                <SidebarGroup>
+                    <SidebarGroupLabel>Live Stats</SidebarGroupLabel>
+                    <Link href="/live" className={getNavLinkClass("/live", { exclude: ["/live/new"] })}>
+                        <TrendingUp className="h-4 w-4" />
+                        View Live Stats
+                    </Link>
+                    <Link href="/live/new" className={getNavLinkClass("/live/new") }>
+                        <Plus className="h-4 w-4" />
+                        New Live Stats
                     </Link>
                 </SidebarGroup>
 
