@@ -39,8 +39,8 @@ export default function useFetchLiveStats(id:string ) {
     }, [])
 
     useEffect(() => {
-        fetchData()
-    }, [])
+        void fetchData();
+    }, [id, fetchData])
 
     return {
         league, 

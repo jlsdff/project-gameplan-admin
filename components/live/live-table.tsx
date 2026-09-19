@@ -111,26 +111,28 @@ export default function LiveStatsTable() {
     );
 
     useEffect(() => {
-        uniqueLeagueIds.forEach((id) => {
-            const alreadyFetched = leagues.some((l) => l.id === id);
-            if (!alreadyFetched) {
+        if (!uniqueLeagueIds.length) return;
+
+        const missingLeagueIds = uniqueLeagueIds.filter((id) => !leagues.some((l) => l.id === id));
+
+        missingLeagueIds.forEach((id) => {
             getLeague(id)
-                .then((league) => setLeagues((prev) => [...prev, league]))
+                .then((league) => setLeagues((prev) => (prev.some((item) => item.id === league.id) ? prev : [...prev, league])))
                 .catch((e) => console.error(e));
-            }
-    });
-    }, [uniqueLeagueIds]);
+        });
+    }, [uniqueLeagueIds, leagues]);
 
     useEffect(() => {
-        uniqueTeamIds.forEach((id) => {
-            const alreadyFetched = teams.some((t) => t.id === id);
-            if (!alreadyFetched) {
+        if (!uniqueTeamIds.length) return;
+
+        const missingTeamIds = uniqueTeamIds.filter((id) => !teams.some((t) => t.id === id));
+
+        missingTeamIds.forEach((id) => {
             getTeam(id)
-                .then((team) => setTeams((prev) => [...prev, team]))
+                .then((team) => setTeams((prev) => (prev.some((item) => item.id === team.id) ? prev : [...prev, team])))
                 .catch((e) => console.error(e));
-            }
-    });
-    }, [uniqueTeamIds]);
+        });
+    }, [uniqueTeamIds, teams]);
 
     
     return (
