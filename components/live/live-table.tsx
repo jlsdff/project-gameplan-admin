@@ -17,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 const columnHelper = createColumnHelper<LiveStatsForm & {id: string}>();
+const EMPTY_LIVE_STATS: Array<LiveStatsForm & { id: string }> = [];
 
 export default function LiveStatsTable() {
 
@@ -91,7 +92,7 @@ export default function LiveStatsTable() {
 
     const table = useReactTable({ 
         columns, 
-        data : data ?? [],
+        data : data ?? EMPTY_LIVE_STATS,
         getCoreRowModel: getCoreRowModel()
     })
 
@@ -111,28 +112,28 @@ export default function LiveStatsTable() {
     );
 
     useEffect(() => {
-        if (!uniqueLeagueIds.length) return;
+        let cancelled = false;
 
-        const missingLeagueIds = uniqueLeagueIds.filter((id) => !leagues.some((l) => l.id === id));
+        const loadMetadata = async () => {
+            const [fetchedLeagues, fetchedTeams] = await Promise.all([
+                Promise.all(uniqueLeagueIds.map((id) => getLeague(id))),
+                Promise.all(uniqueTeamIds.map((id) => getTeam(id))),
+            ]);
 
-        missingLeagueIds.forEach((id) => {
-            getLeague(id)
-                .then((league) => setLeagues((prev) => (prev.some((item) => item.id === league.id) ? prev : [...prev, league])))
-                .catch((e) => console.error(e));
-        });
-    }, [uniqueLeagueIds, leagues]);
+            if (!cancelled) {
+                setLeagues(fetchedLeagues);
+                setTeams(fetchedTeams);
+            }
+        };
 
-    useEffect(() => {
-        if (!uniqueTeamIds.length) return;
+        if (uniqueLeagueIds.length || uniqueTeamIds.length) {
+            loadMetadata().catch((error) => console.error(error));
+        }
 
-        const missingTeamIds = uniqueTeamIds.filter((id) => !teams.some((t) => t.id === id));
-
-        missingTeamIds.forEach((id) => {
-            getTeam(id)
-                .then((team) => setTeams((prev) => (prev.some((item) => item.id === team.id) ? prev : [...prev, team])))
-                .catch((e) => console.error(e));
-        });
-    }, [uniqueTeamIds, teams]);
+        return () => {
+            cancelled = true;
+        };
+    }, [uniqueLeagueIds, uniqueTeamIds]);
 
     
     return (
